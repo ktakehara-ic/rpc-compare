@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package greet.v1;
+
+message GreetRequest {
+  string name = 1;
+  int64 age = 2;
+  Address address = 3;
+
+  message Address {
+    string postal_code = 1;
+    string state_province = 2;
+    string city = 4;
+    string street = 5;
+    string building_name = 6;
+    repeated string note = 7;
+  }
+}
+
+message GreetResponse {
+  string greeting = 1;
+}
+
+service GreetService {
+  rpc Greet(GreetRequest) returns (GreetResponse) {}
+}

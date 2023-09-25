@@ -10,3 +10,9 @@ plugins:
   - plugin: buf.build/connectrpc/go
     out: gen
     opt: paths=source_relative
+  - plugin: twirp
+    out: gen
+    opt: paths=source_relative
+  - plugin: buf.build/grpc/go
+    out: gen
+    opt: paths=source_relative
