@@ -1,6 +1,6 @@
 FROM golang:1.21-alpine
 
-ARG CERT_FILE=./CatoNetworksTrustedRootCA.cer
+ARG CERT_FILE=./custom-cert.cer
 COPY ${CERT_FILE} /etc/ssl/certs/ca-certificates.crt
 RUN apk --no-cache add ca-certificates
 RUN cp /etc/ssl/certs/ca-certificates.crt /usr/local/share/ca-certificates
