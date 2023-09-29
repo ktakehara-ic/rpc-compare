@@ -31,7 +31,42 @@ var (
 			},
 		},
 	}
+
+	smallReq = &greetv1.GreetRequest{
+		Name: "Jane",
+		Age:  34,
+		Address: &greetv1.GreetRequest_Address{
+			PostalCode:    "0000000",
+			StateProvince: "Foo State",
+			City:          "Foo City",
+			Street:        "Bar St.",
+			BuildingName:  "BLDG 1234",
+			Note: []string{
+				"This is example address.",
+			},
+		},
+	}
+	bigReq = &greetv1.GreetRequest{
+		Name: "Jane",
+		Age:  34,
+		Address: &greetv1.GreetRequest_Address{
+			PostalCode:    "0000000",
+			StateProvince: "Foo State",
+			City:          "Foo City",
+			Street:        "Bar St.",
+			BuildingName:  "BLDG 1234",
+			Note: []string{
+				"This is example address.",
+			},
+		},
+	}
 )
+
+func init() {
+	for i := 0; i < 10000; i++ {
+		bigReq.Appendix = append(bigReq.Appendix, fmt.Sprintf("This is appendix text: %d", i))
+	}
+}
 
 func BenchmarkAll(b *testing.B) {
 	grpcLis, err := net.Listen("tcp", "localhost:0")
@@ -119,28 +154,21 @@ func BenchmarkAll(b *testing.B) {
 			client: NewRESTClient(srv.Client(), srv.URL+"/rest"),
 		},
 	}
-	for _, tt := range tests {
-		b.Run(tt.name, func(b *testing.B) {
-			req := &greetv1.GreetRequest{
-				Name: "Jane",
-				Age:  34,
-				Address: &greetv1.GreetRequest_Address{
-					PostalCode:    "0000000",
-					StateProvince: "Foo State",
-					City:          "Foo City",
-					Street:        "Bar St.",
-					BuildingName:  "BLDG 1234",
-					Note: []string{
-						"This is example address.",
-					},
-				},
-			}
-			for i := 0; i < b.N; i++ {
-				resp, err := tt.client.Greet(context.Background(), req)
-				_ = assert.NoError(b, err, "request error") &&
-					assert.Equal(b, "Hello, Jane!", resp.GetGreeting(), "response mismatch")
-			}
-		})
+	for _, reqs := range []struct {
+		name string
+		req  *greetv1.GreetRequest
+	}{
+		{name: "small", req: smallReq}, {name: "big", req: bigReq},
+	} {
+		for _, tt := range tests {
+			b.Run(reqs.name+"/"+tt.name, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					resp, err := tt.client.Greet(context.Background(), reqs.req)
+					_ = assert.NoError(b, err, "request error") &&
+						assert.Equal(b, "Hello, Jane!", resp.GetGreeting(), "response mismatch")
+				}
+			})
+		}
 	}
 }
 

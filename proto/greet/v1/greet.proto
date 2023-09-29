@@ -6,6 +6,7 @@ message GreetRequest {
   string name = 1;
   int64 age = 2;
   Address address = 3;
+  repeated string appendix = 4;
 
   message Address {
     string postal_code = 1;
